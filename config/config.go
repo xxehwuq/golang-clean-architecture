@@ -19,12 +19,12 @@ type (
 var config *Config
 var once sync.Once
 
-func New() (*Config, error) {
+func New() *Config {
 	once.Do(func() {
 		if err := cleanenv.ReadConfig("./config/config.yml", config); err != nil {
 			panic("error reading config: " + err.Error())
 		}
 	})
 
-	return config, nil
+	return config
 }
