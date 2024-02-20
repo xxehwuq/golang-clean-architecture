@@ -11,7 +11,6 @@ type Manager interface {
 	GenerateAccessToken(userClaims UserClaims) (AccessToken, error)
 	GenerateRefreshToken() (RefreshToken, error)
 	ParseUserClaims(accessToken AccessToken) (UserClaims, error)
-	ValidateAccessToken() bool
 }
 
 type AccessToken string
@@ -88,9 +87,4 @@ func (m *manager) ParseUserClaims(accessToken AccessToken) (UserClaims, error) {
 		ID:          claims["sub"].(string),
 		Permissions: claims["permissions"].([]interface{}),
 	}, nil
-}
-
-func (m *manager) ValidateAccessToken() bool {
-	//TODO implement me
-	panic("implement me")
 }
