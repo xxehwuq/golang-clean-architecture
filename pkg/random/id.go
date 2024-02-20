@@ -1,7 +1,7 @@
-package id
+package random
 
 import gonanoid "github.com/matoous/go-nanoid/v2"
 
-func Generate() (string, error) {
+func ID() (string, error) {
 	return gonanoid.New()
 }
