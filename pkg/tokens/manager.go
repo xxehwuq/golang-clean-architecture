@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type Interface interface {
+type Manager interface {
 	GenerateAccessToken(userClaims UserClaims) (AccessToken, error)
 	GenerateRefreshToken() (RefreshToken, error)
 	ParseUserClaims(accessToken AccessToken) (UserClaims, error)
@@ -23,30 +23,30 @@ type UserClaims struct {
 	Permissions []interface{}
 }
 
-type tokens struct {
+type manager struct {
 	signingKey      string
 	accessTokenTTL  time.Duration
 	refreshTokenTTL time.Duration
 }
 
-func New(signingKey string, accessTokenTTL, refreshTokenTTL time.Duration) Interface {
-	return &tokens{
+func New(signingKey string, accessTokenTTL, refreshTokenTTL time.Duration) Manager {
+	return &manager{
 		signingKey:      signingKey,
 		accessTokenTTL:  accessTokenTTL,
 		refreshTokenTTL: refreshTokenTTL,
 	}
 }
 
-func (t *tokens) GenerateAccessToken(userClaims UserClaims) (AccessToken, error) {
+func (m *manager) GenerateAccessToken(userClaims UserClaims) (AccessToken, error) {
 	token := jwt.New(jwt.SigningMethodHS512)
 
 	claims := token.Claims.(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(t.accessTokenTTL).Unix()
+	claims["exp"] = time.Now().Add(m.accessTokenTTL).Unix()
 	claims["iat"] = time.Now().Unix()
 	claims["sub"] = userClaims.ID
 	claims["permissions"] = userClaims.Permissions
 
-	tokenString, err := token.SignedString([]byte(t.signingKey))
+	tokenString, err := token.SignedString([]byte(m.signingKey))
 	if err != nil {
 		return "", err
 	}
@@ -54,7 +54,7 @@ func (t *tokens) GenerateAccessToken(userClaims UserClaims) (AccessToken, error)
 	return AccessToken(tokenString), nil
 }
 
-func (t *tokens) GenerateRefreshToken() (RefreshToken, error) {
+func (m *manager) GenerateRefreshToken() (RefreshToken, error) {
 	b := make([]byte, 32)
 
 	s := rand.NewSource(time.Now().Unix())
@@ -67,13 +67,13 @@ func (t *tokens) GenerateRefreshToken() (RefreshToken, error) {
 	return RefreshToken(fmt.Sprintf("%x", b)), nil
 }
 
-func (t *tokens) ParseUserClaims(accessToken AccessToken) (UserClaims, error) {
+func (m *manager) ParseUserClaims(accessToken AccessToken) (UserClaims, error) {
 	token, err := jwt.Parse(string(accessToken), func(token *jwt.Token) (i interface{}, err error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(t.signingKey), nil
+		return []byte(m.signingKey), nil
 	})
 	if err != nil {
 		return UserClaims{}, err
@@ -90,7 +90,7 @@ func (t *tokens) ParseUserClaims(accessToken AccessToken) (UserClaims, error) {
 	}, nil
 }
 
-func (t *tokens) ValidateAccessToken() bool {
+func (m *manager) ValidateAccessToken() bool {
 	//TODO implement me
 	panic("implement me")
 }
