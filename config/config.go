@@ -9,22 +9,27 @@ import (
 type (
 	Config struct {
 		App App `yaml:"app" env-required:"true"`
+		Log Log `env-required:"true"`
 	}
 
 	App struct {
 		Name string `yaml:"name" env-required:"true"`
 	}
+
+	Log struct {
+		Level string `env:"LOG_LEVEL" env-required:"true"`
+	}
 )
 
-var config *Config
+var config Config
 var once sync.Once
 
 func New() *Config {
 	once.Do(func() {
-		if err := cleanenv.ReadConfig("./config/config.yml", config); err != nil {
+		if err := cleanenv.ReadConfig("./config/config.yml", &config); err != nil {
 			panic("error reading config: " + err.Error())
 		}
 	})
 
-	return config
+	return &config
 }
