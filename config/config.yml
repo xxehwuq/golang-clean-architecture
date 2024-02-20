@@ -1,2 +1,6 @@
 app:
   name: "go-clean-architecture"
+
+postgres:
+  tables:
+    users: "users"

@@ -10,7 +10,7 @@ type (
 	Config struct {
 		App      App      `yaml:"app" env-required:"true"`
 		Log      Log      `env-required:"true"`
-		Postgres Postgres `env-required:"true"`
+		Postgres Postgres `yaml:"postgres" env-required:"true"`
 	}
 
 	App struct {
@@ -22,7 +22,10 @@ type (
 	}
 
 	Postgres struct {
-		URL string `env:"POSTGRES_URL" env-required:"true"`
+		URL    string `env:"POSTGRES_URL" env-required:"true"`
+		Tables struct {
+			Users string `yaml:"users" env-required:"true"`
+		} `yaml:"tables" env-required:"true"`
 	}
 )
 
