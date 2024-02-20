@@ -4,6 +4,7 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 	_ "github.com/joho/godotenv/autoload"
 	"sync"
+	"time"
 )
 
 type (
@@ -11,6 +12,7 @@ type (
 		App      App      `yaml:"app" env-required:"true"`
 		Log      Log      `env-required:"true"`
 		Postgres Postgres `yaml:"postgres" env-required:"true"`
+		Tokens   Tokens   `yaml:"tokens" env-required:"true"`
 	}
 
 	App struct {
@@ -26,6 +28,12 @@ type (
 		Tables struct {
 			Users string `yaml:"users" env-required:"true"`
 		} `yaml:"tables" env-required:"true"`
+	}
+
+	Tokens struct {
+		SigningKey      string        `env:"TOKENS_SIGNING_KEY" env-required:"true"`
+		AccessTokenTTL  time.Duration `yaml:"access_token_ttl"`
+		RefreshTokenTTL time.Duration `yaml:"refresh_token_ttl"`
 	}
 )
 

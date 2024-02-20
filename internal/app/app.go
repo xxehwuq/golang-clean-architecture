@@ -5,6 +5,7 @@ import (
 	"github.com/xxehwuq/go-clean-architecture/internal/repository"
 	"github.com/xxehwuq/go-clean-architecture/pkg/logger"
 	"github.com/xxehwuq/go-clean-architecture/pkg/postgres"
+	"github.com/xxehwuq/go-clean-architecture/pkg/tokens"
 )
 
 func Run(cfg *config.Config) {
@@ -18,6 +19,9 @@ func Run(cfg *config.Config) {
 		l.Fatal("error connecting to postgres: %w", err)
 	}
 	defer pg.Close()
+
+	// Packages
+	tokens.New(cfg.Tokens.SigningKey, cfg.Tokens.AccessTokenTTL, cfg.Tokens.RefreshTokenTTL)
 
 	// Repositories
 	repository.NewUserRepository(pg, cfg.Postgres.Tables.Users)

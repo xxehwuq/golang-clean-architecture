@@ -4,3 +4,7 @@ app:
 postgres:
   tables:
     users: "users"
+
+tokens:
+  access_token_ttl: 2h
+  refresh_token_ttl: 720h
