@@ -8,14 +8,10 @@ import (
 )
 
 type Manager interface {
-	GenerateAccessToken(userClaims UserClaims) (AccessToken, error)
-	GenerateRefreshToken() (RefreshToken, error)
-	ParseUserClaims(accessToken AccessToken) (UserClaims, error)
+	GenerateAccessToken(userClaims UserClaims) (string, error)
+	GenerateRefreshToken() (string, error)
+	ParseUserClaims(accessToken string) (UserClaims, error)
 }
-
-type AccessToken string
-
-type RefreshToken string
 
 type UserClaims struct {
 	ID          string
@@ -36,7 +32,7 @@ func New(signingKey string, accessTokenTTL, refreshTokenTTL time.Duration) Manag
 	}
 }
 
-func (m *manager) GenerateAccessToken(userClaims UserClaims) (AccessToken, error) {
+func (m *manager) GenerateAccessToken(userClaims UserClaims) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS512)
 
 	claims := token.Claims.(jwt.MapClaims)
@@ -50,10 +46,10 @@ func (m *manager) GenerateAccessToken(userClaims UserClaims) (AccessToken, error
 		return "", err
 	}
 
-	return AccessToken(tokenString), nil
+	return tokenString, nil
 }
 
-func (m *manager) GenerateRefreshToken() (RefreshToken, error) {
+func (m *manager) GenerateRefreshToken() (string, error) {
 	b := make([]byte, 32)
 
 	s := rand.NewSource(time.Now().Unix())
@@ -63,11 +59,11 @@ func (m *manager) GenerateRefreshToken() (RefreshToken, error) {
 		return "", err
 	}
 
-	return RefreshToken(fmt.Sprintf("%x", b)), nil
+	return fmt.Sprintf("%x", b), nil
 }
 
-func (m *manager) ParseUserClaims(accessToken AccessToken) (UserClaims, error) {
-	token, err := jwt.Parse(string(accessToken), func(token *jwt.Token) (i interface{}, err error) {
+func (m *manager) ParseUserClaims(accessToken string) (UserClaims, error) {
+	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (i interface{}, err error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
