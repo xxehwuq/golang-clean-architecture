@@ -8,4 +8,6 @@ Golang Clean Architecture Implementation
 
 ```dotenv
 LOG_LEVEL=<debug>
+
+POSTGRES_URL=<postgres://jack:secret@pg.example.com:5432/mydb>
 ```

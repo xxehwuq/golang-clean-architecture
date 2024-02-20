@@ -8,8 +8,9 @@ import (
 
 type (
 	Config struct {
-		App App `yaml:"app" env-required:"true"`
-		Log Log `env-required:"true"`
+		App      App      `yaml:"app" env-required:"true"`
+		Log      Log      `env-required:"true"`
+		Postgres Postgres `env-required:"true"`
 	}
 
 	App struct {
@@ -18,6 +19,10 @@ type (
 
 	Log struct {
 		Level string `env:"LOG_LEVEL" env-required:"true"`
+	}
+
+	Postgres struct {
+		URL string `env:"POSTGRES_URL" env-required:"true"`
 	}
 )
 
