@@ -12,4 +12,6 @@ LOG_LEVEL=<debug>
 POSTGRES_URL=<postgres://jack:secret@pg.example.com:5432/mydb>
 
 TOKENS_SIGNING_KEY=<secret-key>
+
+PASSWORD_SALT=<secret-salt>
 ```

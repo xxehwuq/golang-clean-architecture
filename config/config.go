@@ -13,6 +13,7 @@ type (
 		Log      Log      `env-required:"true"`
 		Postgres Postgres `yaml:"postgres" env-required:"true"`
 		Tokens   Tokens   `yaml:"tokens" env-required:"true"`
+		Password Password `yaml:"password" env-required:"true"`
 	}
 
 	App struct {
@@ -34,6 +35,10 @@ type (
 		SigningKey      string        `env:"TOKENS_SIGNING_KEY" env-required:"true"`
 		AccessTokenTTL  time.Duration `yaml:"access_token_ttl"`
 		RefreshTokenTTL time.Duration `yaml:"refresh_token_ttl"`
+	}
+
+	Password struct {
+		Salt string `env:"PASSWORD_SALT" env-required:"true"`
 	}
 )
 
