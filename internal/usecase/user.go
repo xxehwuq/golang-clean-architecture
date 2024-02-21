@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/xxehwuq/go-clean-architecture/internal/entity"
+	"github.com/xxehwuq/go-clean-architecture/internal/repository"
 	"github.com/xxehwuq/go-clean-architecture/pkg/password"
 	"github.com/xxehwuq/go-clean-architecture/pkg/random"
 	"github.com/xxehwuq/go-clean-architecture/pkg/tokens"
@@ -11,12 +12,12 @@ import (
 )
 
 type userUsecase struct {
-	repository     entity.UserRepository
+	repository     repository.UserRepository
 	tokensManager  tokens.Manager
 	passwordHasher password.Hasher
 }
 
-func NewUserUsecase(repository entity.UserRepository, tokensManager tokens.Manager, passwordHasher password.Hasher) entity.UserUsecase {
+func NewUserUsecase(repository repository.UserRepository, tokensManager tokens.Manager, passwordHasher password.Hasher) UserUsecase {
 	return &userUsecase{
 		repository:     repository,
 		tokensManager:  tokensManager,
@@ -24,53 +25,55 @@ func NewUserUsecase(repository entity.UserRepository, tokensManager tokens.Manag
 	}
 }
 
-func (uc *userUsecase) SignUp(ctx context.Context, u *entity.User) (*entity.UserTokens, error) {
+func (uc *userUsecase) SignUp(ctx context.Context, input UserSignUpInput) (UserTokens, error) {
 	id, err := random.ID()
 	if err != nil {
-		return nil, err
+		return UserTokens{}, err
 	}
 
-	hashedPassword, err := uc.passwordHasher.Hash(u.Password)
+	hashedPassword, err := uc.passwordHasher.Hash(input.Password)
 	if err != nil {
-		return nil, err
+		return UserTokens{}, err
 	}
 
-	u.ID = id
-	u.Password = hashedPassword
-	u.CreatedAt = time.Now()
-	u.UpdatedAt = time.Now()
-
-	if err = uc.repository.Create(ctx, u); err != nil {
-		return nil, err
+	if err = uc.repository.Create(ctx, entity.User{
+		ID:        id,
+		Name:      input.Name,
+		Email:     input.Email,
+		Password:  hashedPassword,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}); err != nil {
+		return UserTokens{}, err
 	}
 
 	accessToken, err := uc.tokensManager.GenerateAccessToken(tokens.UserClaims{
-		ID:          u.ID,
+		ID:          id,
 		Permissions: nil,
 	})
 	if err != nil {
-		return nil, err
+		return UserTokens{}, err
 	}
 
 	refreshToken, err := uc.tokensManager.GenerateRefreshToken()
 	if err != nil {
-		return nil, err
+		return UserTokens{}, err
 	}
 
-	return &entity.UserTokens{
+	return UserTokens{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
 }
 
-func (uc *userUsecase) SignIn(ctx context.Context, u *entity.User) (*entity.UserTokens, error) {
-	user, err := uc.repository.GetByEmail(ctx, u.Email)
+func (uc *userUsecase) SignIn(ctx context.Context, input UserSignInInput) (UserTokens, error) {
+	user, err := uc.repository.GetByEmail(ctx, input.Email)
 	if err != nil {
-		return nil, err
+		return UserTokens{}, err
 	}
 
-	if !uc.passwordHasher.Compare(u.Password, user.Password) {
-		return nil, errors.New("incorrect credentials")
+	if !uc.passwordHasher.Compare(input.Password, user.Password) {
+		return UserTokens{}, errors.New("incorrect credentials")
 	}
 
 	accessToken, err := uc.tokensManager.GenerateAccessToken(tokens.UserClaims{
@@ -78,15 +81,15 @@ func (uc *userUsecase) SignIn(ctx context.Context, u *entity.User) (*entity.User
 		Permissions: nil,
 	})
 	if err != nil {
-		return nil, err
+		return UserTokens{}, err
 	}
 
 	refreshToken, err := uc.tokensManager.GenerateRefreshToken()
 	if err != nil {
-		return nil, err
+		return UserTokens{}, err
 	}
 
-	return &entity.UserTokens{
+	return UserTokens{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil

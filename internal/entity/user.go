@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"context"
 	"time"
 )
 
@@ -12,14 +11,4 @@ type User struct {
 	Password  string    `json:"password"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-}
-
-type UserTokens struct {
-	AccessToken  string
-	RefreshToken string
-}
-
-type UserUsecase interface {
-	SignUp(ctx context.Context, u *User) (*UserTokens, error)
-	SignIn(ctx context.Context, u *User) (*UserTokens, error)
 }
