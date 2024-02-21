@@ -3,13 +3,15 @@ package app
 import (
 	"github.com/xxehwuq/go-clean-architecture/config"
 	"github.com/xxehwuq/go-clean-architecture/internal/repository"
+	"github.com/xxehwuq/go-clean-architecture/internal/usecase"
 	"github.com/xxehwuq/go-clean-architecture/pkg/logger"
+	"github.com/xxehwuq/go-clean-architecture/pkg/password"
 	"github.com/xxehwuq/go-clean-architecture/pkg/postgres"
 	"github.com/xxehwuq/go-clean-architecture/pkg/tokens"
 )
 
 func Run(cfg *config.Config) {
-	// Logger initializing
+	// Logger
 	l := logger.New(cfg.Log.Level, logger.Console)
 	l.Info("🚀 Starting %s", cfg.App.Name)
 
@@ -21,8 +23,12 @@ func Run(cfg *config.Config) {
 	defer pg.Close()
 
 	// Packages
-	tokens.New(cfg.Tokens.SigningKey, cfg.Tokens.AccessTokenTTL, cfg.Tokens.RefreshTokenTTL)
+	tokensManager := tokens.New(cfg.Tokens.SigningKey, cfg.Tokens.AccessTokenTTL, cfg.Tokens.RefreshTokenTTL)
+	passwordHasher := password.NewHasher(cfg.Password.Salt)
 
 	// Repositories
-	repository.NewUserRepository(pg, cfg.Postgres.Tables.Users)
+	userRepository := repository.NewUserRepository(pg, cfg.Postgres.Tables.Users)
+
+	// Usecases
+	usecase.NewUserUsecase(userRepository, tokensManager, passwordHasher)
 }

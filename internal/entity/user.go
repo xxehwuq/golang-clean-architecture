@@ -14,7 +14,17 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type UserTokens struct {
+	AccessToken  string
+	RefreshToken string
+}
+
 type UserRepository interface {
-	Create(context.Context, *User) error
-	GetByEmail(context.Context, string) (*User, error)
+	Create(ctx context.Context, u *User) error
+	GetByEmail(ctx context.Context, email string) (*User, error)
+}
+
+type UserUsecase interface {
+	SignUp(ctx context.Context, u *User) (*UserTokens, error)
+	SignIn(ctx context.Context, u *User) (*UserTokens, error)
 }
