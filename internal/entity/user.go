@@ -19,11 +19,6 @@ type UserTokens struct {
 	RefreshToken string
 }
 
-type UserRepository interface {
-	Create(ctx context.Context, u *User) error
-	GetByEmail(ctx context.Context, email string) (*User, error)
-}
-
 type UserUsecase interface {
 	SignUp(ctx context.Context, u *User) (*UserTokens, error)
 	SignIn(ctx context.Context, u *User) (*UserTokens, error)
