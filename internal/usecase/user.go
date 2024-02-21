@@ -7,6 +7,7 @@ import (
 	"github.com/xxehwuq/go-clean-architecture/pkg/password"
 	"github.com/xxehwuq/go-clean-architecture/pkg/random"
 	"github.com/xxehwuq/go-clean-architecture/pkg/tokens"
+	"time"
 )
 
 type userUsecase struct {
@@ -36,6 +37,8 @@ func (uc *userUsecase) SignUp(ctx context.Context, u *entity.User) (*entity.User
 
 	u.ID = id
 	u.Password = hashedPassword
+	u.CreatedAt = time.Now()
+	u.UpdatedAt = time.Now()
 
 	if err = uc.repository.Create(ctx, u); err != nil {
 		return nil, err

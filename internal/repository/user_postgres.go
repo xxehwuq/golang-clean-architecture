@@ -23,7 +23,7 @@ func (r *userRepository) Create(ctx context.Context, u *entity.User) error {
 	sql, args, err := r.Builder.
 		Insert(r.tableName).
 		Columns("id", "name", "email", "password", "created_at", "updated_at").
-		Values(u.ID, u.Name, u.Email, u.Password, squirrel.Expr("NOW()"), squirrel.Expr("NOW()")).
+		Values(u.ID, u.Name, u.Email, u.Password, u.CreatedAt, u.UpdatedAt).
 		ToSql()
 	if err != nil {
 		return err
