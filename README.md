@@ -14,4 +14,6 @@ POSTGRES_URL=<postgres://jack:secret@pg.example.com:5432/mydb>
 TOKENS_SIGNING_KEY=<secret-key>
 
 PASSWORD_SALT=<secret-salt>
+
+REDIS_URL=<redis://user:pass@localhost:6379/db>
 ```

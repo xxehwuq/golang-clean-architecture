@@ -10,10 +10,11 @@ import (
 type (
 	Config struct {
 		App      App      `yaml:"app" env-required:"true"`
-		Log      Log      `env-required:"true"`
+		Log      Log      `yaml:"log" env-required:"true"`
 		Postgres Postgres `yaml:"postgres" env-required:"true"`
 		Tokens   Tokens   `yaml:"tokens" env-required:"true"`
 		Password Password `yaml:"password" env-required:"true"`
+		Redis    Redis    `yaml:"redis" env-required:"true"`
 	}
 
 	App struct {
@@ -39,6 +40,10 @@ type (
 
 	Password struct {
 		Salt string `env:"PASSWORD_SALT" env-required:"true"`
+	}
+
+	Redis struct {
+		URL string `env:"REDIS_URL" env-required:"true"`
 	}
 )
 

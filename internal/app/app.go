@@ -7,6 +7,7 @@ import (
 	"github.com/xxehwuq/go-clean-architecture/pkg/logger"
 	"github.com/xxehwuq/go-clean-architecture/pkg/password"
 	"github.com/xxehwuq/go-clean-architecture/pkg/postgres"
+	"github.com/xxehwuq/go-clean-architecture/pkg/redis"
 	"github.com/xxehwuq/go-clean-architecture/pkg/tokens"
 )
 
@@ -22,6 +23,13 @@ func Run(cfg *config.Config) {
 	}
 	defer pg.Close()
 
+	// Redis
+	rd, err := redis.New(cfg.Redis.URL)
+	if err != nil {
+		l.Fatal("error connecting to redis: %w", err)
+	}
+	defer rd.Close()
+
 	// Packages
 	tokensManager := tokens.New(cfg.Tokens.SigningKey, cfg.Tokens.AccessTokenTTL, cfg.Tokens.RefreshTokenTTL)
 	passwordHasher := password.NewHasher(cfg.Password.Salt)
@@ -30,5 +38,5 @@ func Run(cfg *config.Config) {
 	userRepository := repository.NewUserRepository(pg, cfg.Postgres.Tables.Users)
 
 	// Usecases
-	usecase.NewUserUsecase(userRepository, tokensManager, passwordHasher)
+	usecase.NewUserUsecase(userRepository, tokensManager, passwordHasher, rd)
 }

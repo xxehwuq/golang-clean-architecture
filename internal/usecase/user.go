@@ -7,6 +7,7 @@ import (
 	"github.com/xxehwuq/go-clean-architecture/internal/repository"
 	"github.com/xxehwuq/go-clean-architecture/pkg/password"
 	"github.com/xxehwuq/go-clean-architecture/pkg/random"
+	"github.com/xxehwuq/go-clean-architecture/pkg/redis"
 	"github.com/xxehwuq/go-clean-architecture/pkg/tokens"
 	"time"
 )
@@ -15,13 +16,15 @@ type userUsecase struct {
 	repository     repository.UserRepository
 	tokensManager  tokens.Manager
 	passwordHasher password.Hasher
+	redisDB        *redis.Redis
 }
 
-func NewUserUsecase(repository repository.UserRepository, tokensManager tokens.Manager, passwordHasher password.Hasher) UserUsecase {
+func NewUserUsecase(repository repository.UserRepository, tokensManager tokens.Manager, passwordHasher password.Hasher, redis *redis.Redis) UserUsecase {
 	return &userUsecase{
 		repository:     repository,
 		tokensManager:  tokensManager,
 		passwordHasher: passwordHasher,
+		redisDB:        redis,
 	}
 }
 
