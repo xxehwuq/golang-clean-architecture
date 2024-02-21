@@ -40,6 +40,7 @@ func (r *userRepository) Create(ctx context.Context, u *entity.User) error {
 func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
 	sql, args, err := r.Builder.
 		Select("id", "name", "email", "password", "created_at", "updated_at").
+		From(r.tableName).
 		Where(squirrel.Eq{"email": email}).
 		Limit(1).
 		ToSql()
@@ -47,12 +48,12 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.
 		return nil, err
 	}
 
-	var user *entity.User
+	var user entity.User
 
-	err = r.Pool.QueryRow(ctx, sql, args...).Scan(user.ID, user.Name, user.Email, user.Password, user.CreatedAt, user.UpdatedAt)
+	err = r.Pool.QueryRow(ctx, sql, args...).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
 
-	return user, err
+	return &user, err
 }
