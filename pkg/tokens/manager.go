@@ -14,8 +14,7 @@ type Manager interface {
 }
 
 type UserClaims struct {
-	ID          string
-	Permissions []interface{}
+	ID string
 }
 
 type manager struct {
@@ -37,7 +36,6 @@ func (m *manager) GenerateAccessToken(userClaims UserClaims) (string, error) {
 	claims["exp"] = time.Now().Add(m.accessTokenTTL).Unix()
 	claims["iat"] = time.Now().Unix()
 	claims["sub"] = userClaims.ID
-	claims["permissions"] = userClaims.Permissions
 
 	tokenString, err := token.SignedString([]byte(m.signingKey))
 	if err != nil {
@@ -78,7 +76,6 @@ func (m *manager) ParseUserClaims(accessToken string) (UserClaims, error) {
 	}
 
 	return UserClaims{
-		ID:          claims["sub"].(string),
-		Permissions: claims["permissions"].([]interface{}),
+		ID: claims["sub"].(string),
 	}, nil
 }
