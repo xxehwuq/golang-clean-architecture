@@ -68,14 +68,10 @@ func (uc *userUsecase) SignIn(ctx context.Context, input UserSignInInput) (UserT
 	return uc.createSession(ctx, user.ID)
 }
 
-func (uc *userUsecase) RefreshTokens(ctx context.Context, refreshToken, userID string) (UserTokens, error) {
-	var id string
+func (uc *userUsecase) RefreshTokens(ctx context.Context, refreshToken string) (UserTokens, error) {
+	var userID string
 
-	if err := uc.redisDB.Get(ctx, refreshToken).Scan(&id); err != nil {
-		return UserTokens{}, errors.New("invalid refresh token")
-	}
-
-	if userID != id {
+	if err := uc.redisDB.Get(ctx, refreshToken).Scan(&userID); err != nil {
 		return UserTokens{}, errors.New("invalid refresh token")
 	}
 
