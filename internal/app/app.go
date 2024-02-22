@@ -31,12 +31,12 @@ func Run(cfg *config.Config) {
 	defer rd.Close()
 
 	// Packages
-	tokensManager := tokens.New(cfg.Tokens.SigningKey, cfg.Tokens.AccessTokenTTL, cfg.Tokens.RefreshTokenTTL)
+	tokensManager := tokens.New(cfg.Tokens.SigningKey, cfg.Tokens.AccessTokenTTL)
 	passwordHasher := password.NewHasher(cfg.Password.Salt)
 
 	// Repositories
 	userRepository := repository.NewUserRepository(pg, cfg.Postgres.Tables.Users)
 
 	// Usecases
-	usecase.NewUserUsecase(userRepository, tokensManager, passwordHasher, rd)
+	usecase.NewUserUsecase(userRepository, tokensManager, passwordHasher, rd, cfg.Tokens.RefreshTokenTTL)
 }

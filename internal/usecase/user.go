@@ -13,18 +13,20 @@ import (
 )
 
 type userUsecase struct {
-	repository     repository.UserRepository
-	tokensManager  tokens.Manager
-	passwordHasher password.Hasher
-	redisDB        *redis.Redis
+	repository      repository.UserRepository
+	tokensManager   tokens.Manager
+	passwordHasher  password.Hasher
+	redisDB         *redis.Redis
+	refreshTokenTTL time.Duration
 }
 
-func NewUserUsecase(repository repository.UserRepository, tokensManager tokens.Manager, passwordHasher password.Hasher, redis *redis.Redis) UserUsecase {
+func NewUserUsecase(repository repository.UserRepository, tokensManager tokens.Manager, passwordHasher password.Hasher, redis *redis.Redis, refreshTokenTTL time.Duration) UserUsecase {
 	return &userUsecase{
-		repository:     repository,
-		tokensManager:  tokensManager,
-		passwordHasher: passwordHasher,
-		redisDB:        redis,
+		repository:      repository,
+		tokensManager:   tokensManager,
+		passwordHasher:  passwordHasher,
+		redisDB:         redis,
+		refreshTokenTTL: refreshTokenTTL,
 	}
 }
 
@@ -50,23 +52,7 @@ func (uc *userUsecase) SignUp(ctx context.Context, input UserSignUpInput) (UserT
 		return UserTokens{}, err
 	}
 
-	accessToken, err := uc.tokensManager.GenerateAccessToken(tokens.UserClaims{
-		ID:          id,
-		Permissions: nil,
-	})
-	if err != nil {
-		return UserTokens{}, err
-	}
-
-	refreshToken, err := uc.tokensManager.GenerateRefreshToken()
-	if err != nil {
-		return UserTokens{}, err
-	}
-
-	return UserTokens{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}, nil
+	return uc.createSession(ctx, id, nil) // TODO: user permissions
 }
 
 func (uc *userUsecase) SignIn(ctx context.Context, input UserSignInInput) (UserTokens, error) {
@@ -79,9 +65,27 @@ func (uc *userUsecase) SignIn(ctx context.Context, input UserSignInInput) (UserT
 		return UserTokens{}, errors.New("incorrect credentials")
 	}
 
+	return uc.createSession(ctx, user.ID, nil) // TODO: user permissions
+}
+
+func (uc *userUsecase) RefreshTokens(ctx context.Context, refreshToken, userID string, userPermissions []interface{}) (UserTokens, error) {
+	var id string
+
+	if err := uc.redisDB.Get(ctx, refreshToken).Scan(&id); err != nil {
+		return UserTokens{}, errors.New("invalid refresh token")
+	}
+
+	if userID != id {
+		return UserTokens{}, errors.New("invalid refresh token")
+	}
+
+	return uc.createSession(ctx, userID, userPermissions)
+}
+
+func (uc *userUsecase) createSession(ctx context.Context, userID string, userPermissions []interface{}) (UserTokens, error) {
 	accessToken, err := uc.tokensManager.GenerateAccessToken(tokens.UserClaims{
-		ID:          user.ID,
-		Permissions: nil,
+		ID:          userID,
+		Permissions: userPermissions,
 	})
 	if err != nil {
 		return UserTokens{}, err
@@ -91,6 +95,8 @@ func (uc *userUsecase) SignIn(ctx context.Context, input UserSignInInput) (UserT
 	if err != nil {
 		return UserTokens{}, err
 	}
+
+	uc.redisDB.Set(ctx, refreshToken, userID, uc.refreshTokenTTL)
 
 	return UserTokens{
 		AccessToken:  accessToken,

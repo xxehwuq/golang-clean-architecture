@@ -21,4 +21,5 @@ type UserTokens struct {
 type UserUsecase interface {
 	SignUp(ctx context.Context, input UserSignUpInput) (UserTokens, error)
 	SignIn(ctx context.Context, input UserSignInInput) (UserTokens, error)
+	RefreshTokens(ctx context.Context, refreshToken, userID string, userPermissions []interface{}) (UserTokens, error)
 }

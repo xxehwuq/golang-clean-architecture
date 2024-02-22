@@ -19,16 +19,14 @@ type UserClaims struct {
 }
 
 type manager struct {
-	signingKey      string
-	accessTokenTTL  time.Duration
-	refreshTokenTTL time.Duration
+	signingKey     string
+	accessTokenTTL time.Duration
 }
 
-func New(signingKey string, accessTokenTTL, refreshTokenTTL time.Duration) Manager {
+func New(signingKey string, accessTokenTTL time.Duration) Manager {
 	return &manager{
-		signingKey:      signingKey,
-		accessTokenTTL:  accessTokenTTL,
-		refreshTokenTTL: refreshTokenTTL,
+		signingKey:     signingKey,
+		accessTokenTTL: accessTokenTTL,
 	}
 }
 
