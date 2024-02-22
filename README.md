@@ -2,7 +2,7 @@
 
 Golang Clean Architecture Implementation
 
-[API Documentation](https://documenter.getpostman.com/view/20867991/2sA2rAzhbA#37d5928e-f259-4db8-b675-3fabbbadde7c)
+[API Documentation](https://documenter.getpostman.com/view/20867991/2sA2rAzhbA)
 
 ### Setup
 
