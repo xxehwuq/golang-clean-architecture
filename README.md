@@ -1,4 +1,4 @@
-# go-clean-architecture
+# golang-clean-architecture
 
 Golang Clean Architecture Implementation
 
