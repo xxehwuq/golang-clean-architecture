@@ -17,3 +17,9 @@ PASSWORD_SALT=<secret-salt>
 
 REDIS_URL=<redis://user:pass@localhost:6379/db>
 ```
+
+2. Run:
+
+```shell
+make
+```
